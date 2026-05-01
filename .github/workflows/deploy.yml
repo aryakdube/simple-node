@@ -1,15 +1,12 @@
 name: deploy-main
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -20,20 +17,29 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            set -e
+            set -e  # 🚨 stop on any error
 
             APP_DIR="/var/www/app/main"
             REPO_URL="https://github.com/YOUR_USERNAME/YOUR_REPO.git"
 
             echo "🚀 Deploying MAIN environment..."
 
+            # ✅ Check if directory exists
             if [ ! -d "$APP_DIR" ]; then
+              echo "📁 Directory not found. Creating and cloning repo..."
+
               mkdir -p $APP_DIR
               cd $APP_DIR
+
               git clone $REPO_URL .
+
             else
+              echo "📂 Directory exists. Pulling latest code..."
               cd $APP_DIR
+
+              # If somehow .git is missing, re-clone
               if [ ! -d ".git" ]; then
+                echo "⚠️ Not a git repo. Re-cloning..."
                 rm -rf *
                 git clone $REPO_URL .
               else
@@ -41,6 +47,7 @@ jobs:
               fi
             fi
 
+            echo "🐳 Building & restarting containers..."
             docker compose --profile main up -d --build --force-recreate --remove-orphans
 
-            echo "✅ MAIN deployment completed"
+            echo "✅ MAIN deployment completed successfully"
