@@ -20,7 +20,7 @@ COPY . .
 
 EXPOSE ${PORT}
 
-CMD ["sh", "-c", "npx babel-node src/index.js --presets es2015,stage-0"]
+CMD ["node", "src/index.js"]
 
 # ---------------- PROD ----------------
 FROM base AS prod
@@ -38,4 +38,4 @@ USER nodejs
 
 EXPOSE ${PORT}
 
-CMD ["sh", "-c", "npx babel-node src/index.js --presets es2015,stage-0"]
+CMD ["node", "src/index.js"]
