@@ -1,12 +1,15 @@
-name: deploy
+name: deploy-main
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types:
+      - closed
 
 jobs:
-  deploy-main:
+  deploy:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -17,12 +20,27 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            echo "Deploying MAIN environment..."
+            set -e
 
-            cd /var/www/app/main
+            APP_DIR="/var/www/app/main"
+            REPO_URL="https://github.com/YOUR_USERNAME/YOUR_REPO.git"
 
-            git pull origin main
+            echo "🚀 Deploying MAIN environment..."
+
+            if [ ! -d "$APP_DIR" ]; then
+              mkdir -p $APP_DIR
+              cd $APP_DIR
+              git clone $REPO_URL .
+            else
+              cd $APP_DIR
+              if [ ! -d ".git" ]; then
+                rm -rf *
+                git clone $REPO_URL .
+              else
+                git pull origin main
+              fi
+            fi
 
             docker compose --profile main up -d --build --force-recreate --remove-orphans
 
-            echo "MAIN deployment completed"
+            echo "✅ MAIN deployment completed"
