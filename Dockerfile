@@ -1,41 +1,21 @@
 # syntax=docker/dockerfile:1
 ARG NODE_VERSION=20-alpine
 
-FROM node:${NODE_VERSION} AS base
+FROM node:${NODE_VERSION}
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-# ---------------- MAIN ----------------
-FROM base AS main
-ENV APP_ENV=main
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
 
-EXPOSE ${PORT}
+COPY src ./src
 
-CMD ["node", "src/index.js"]
-
-# ---------------- PROD ----------------
-FROM base AS prod
-ENV APP_ENV=production
-ENV NODE_ENV=production
-ENV PORT=4000
-
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-RUN chown -R nodejs:nodejs /app
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 \
+  && chown -R nodejs:nodejs /app
 USER nodejs
 
-EXPOSE ${PORT}
+EXPOSE 3000
 
 CMD ["node", "src/index.js"]
