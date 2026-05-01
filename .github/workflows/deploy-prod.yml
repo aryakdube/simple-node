@@ -76,7 +76,7 @@ jobs:
               echo "📁 First deployment..."
               mkdir -p $APP_DIR
               cd $APP_DIR
-              git clone $REPO_URL .
+              git clone -b prod $REPO_URL .
             else
               echo "📂 Updating existing deployment..."
               cd $APP_DIR
@@ -84,11 +84,11 @@ jobs:
               if [ ! -d ".git" ]; then
                 echo "⚠️ Not a git repo. Re-cloning..."
                 rm -rf *
-                git clone $REPO_URL .
+                git clone -b prod $REPO_URL .
               else
                 echo "🔄 Fetching latest code..."
                 git fetch origin
-                git reset --hard origin/main
+                git reset --hard origin/prod
               fi
             fi
 
@@ -100,7 +100,7 @@ jobs:
 
               cat <<EOF > $APP_DIR/.env.prod
             NODE_ENV=production
-            PORT=3000
+            PORT=4000
             EOF
             else
               echo "✅ .env.prod already exists"
