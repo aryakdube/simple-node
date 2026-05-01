@@ -59,7 +59,7 @@ jobs:
               echo "✅ Docker already installed"
             fi
 
-            # -------------------------------
+            # -----------------------------------------
             # ✅ Ensure Docker is running
             # -------------------------------
             if ! sudo systemctl is-active --quiet docker; then
