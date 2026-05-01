@@ -1,16 +1,16 @@
-name: deploy-main
+name: deploy-prod
 
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy MAIN via SSH
+      - name: Deploy PROD via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e
 
-            APP_DIR="$HOME/app/main"
+            APP_DIR="$HOME/app/prod"
             REPO_URL="https://github.com/aryakdube/simple-node.git"
 
             echo "🚀 Starting deployment..."
@@ -70,7 +70,7 @@ jobs:
             # -------------------------------
             # ✅ Deployment Logic
             # -------------------------------
-            echo "🚀 Deploying MAIN environment..."
+            echo "🚀 Deploying PROD environment..."
 
             if [ ! -d "$APP_DIR" ]; then
               echo "📁 First deployment..."
@@ -93,23 +93,23 @@ jobs:
             fi
 
             # -------------------------------
-            # ✅ Ensure .env.main exists
+            # ✅ Ensure .env.prod exists
             # -------------------------------
-            if [ ! -f "$APP_DIR/.env.main" ]; then
-              echo "📝 Creating default .env.main..."
+            if [ ! -f "$APP_DIR/.env.prod" ]; then
+              echo "📝 Creating default .env.prod..."
 
-              cat <<EOF > $APP_DIR/.env.main
+              cat <<EOF > $APP_DIR/.env.prod
             NODE_ENV=production
             PORT=3000
             EOF
             else
-              echo "✅ .env.main already exists"
+              echo "✅ .env.prod already exists"
             fi
 
             # -------------------------------
             # ✅ Run containers
             # -------------------------------
             echo "🐳 Building & restarting containers..."
-            sudo docker compose --profile main up -d --build --force-recreate --remove-orphans
+            sudo docker compose --profile prod up -d --build --force-recreate --remove-orphans
 
-            echo "✅ MAIN deployment completed successfully"
+            echo "✅ PROD deployment completed successfully"
