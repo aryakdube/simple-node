@@ -93,6 +93,20 @@ jobs:
             fi
 
             # -------------------------------
+            # ✅ Ensure .env.main exists
+            # -------------------------------
+            if [ ! -f "$APP_DIR/.env.main" ]; then
+              echo "📝 Creating default .env.main..."
+
+              cat <<EOF > $APP_DIR/.env.main
+            NODE_ENV=production
+            PORT=3000
+            EOF
+            else
+              echo "✅ .env.main already exists"
+            fi
+
+            # -------------------------------
             # ✅ Run containers
             # -------------------------------
             echo "🐳 Building & restarting containers..."
